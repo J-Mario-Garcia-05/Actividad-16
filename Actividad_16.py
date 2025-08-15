@@ -7,6 +7,14 @@ class Libro:
     def __str__(self):
         return f'Titulo: {self.titulo}, autor: {self.autor}, año de publicacion: {self.publicacion}'
 
+class Usuario:
+    def __init__(self, nombre, carrera):
+        self.nombre = nombre
+        self.carrera = carrera
+
+    def __str__(self):
+        return f'Nombre: {self.nombre}, carrera: {self.carrera}'
+
 
 class GestionLibro:
     def __init__(self):
@@ -48,15 +56,6 @@ class GestionLibro:
                 print("Estado: ", libro['estado'])
 
 
-class Usuario:
-    def __init__(self, nombre, carrera):
-        self.nombre = nombre
-        self.carrera = carrera
-
-    def __str__(self):
-        return f'Nombre: {self.nombre}, carrera: {self.carrera}'
-
-
 class GestionUsuario:
     def __init__(self):
         self.usuarios = {}
@@ -95,30 +94,27 @@ class GestionarPrestamo:
         self.prestamos = {}
 
     def realizar_prestamo(self, libro, usuario):
-        while True:
-            buscar_libro = libro.buscar(input("Ingrese el código del libro: "))
-            if buscar_libro is None or buscar_libro['estado'] == "No disponible":
-                print("Libro no disponible o no encontrado, intente con uno diferente")
-                continue
-            buscar_libro['estado'] = "No disponible"
-            break
-        while True:
-            buscar_usuario = usuario.buscar(input("Ingrese el carné del usuario: "))
+        try:
+            codigo_libro = input("Código del libro: ")
+            buscar_libro = libro.buscar(codigo_libro)
+            if buscar_libro is None or buscar_libro["estado"] != "Disponible":
+                raise ValueError("Libro no encontrado o no disponible.")
+            carnet_usuario = input("Carné del usuario: ")
+            buscar_usuario = usuario.buscar(carnet_usuario)
             if buscar_usuario is None:
-                print("No se ha encontrado el usuario, intente de nuevo")
-                continue
-            break
-        while True:
-            num_prestamo = input("Ingrese el número de prestamo:")
+                raise ValueError("Usuario no encontrado.")
+            num_prestamo = input("Número de préstamo: ")
             if num_prestamo in self.prestamos:
-                print(f"Ya existe el préstamo num{num_prestamo}, intente con un número diferente")
-                continue
-            break
-        self.prestamos[num_prestamo] = {
-            'libro': buscar_libro,
-            'usuario': buscar_usuario
-        }
-        print("El registro del préstamo se completo correctamente")
+                raise ValueError("Ya existe un préstamo con ese número.")
+            self.prestamos[num_prestamo] = {
+                "libro": buscar_libro,
+                "usuario": buscar_usuario
+            }
+            buscar_libro["estado"] = "No disponible"
+            print("Préstamo registrado correctamente.")
+
+        except ValueError as e:
+            print(f"Error: {e}")
 
     def mostrar(self):
         if len(self.prestamos) < 1:
